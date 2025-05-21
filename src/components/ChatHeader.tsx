@@ -4,6 +4,7 @@ import { IconX } from "@tabler/icons-react";
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore();
+  const { isTyping, typingUserId } = useAuthStore();
   const { onlineUsers } = useAuthStore();
 
   return (
@@ -25,7 +26,11 @@ const ChatHeader = () => {
           <div>
             <h3 className="font-medium">{selectedUser.fullName}</h3>
             <p className="text-sm text-neutral-400">
-              {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
+              {onlineUsers.includes(selectedUser._id)
+                ? isTyping && typingUserId === selectedUser._id
+                  ? "Typing..."
+                  : "Online"
+                : "Offline"}
             </p>
           </div>
         </div>

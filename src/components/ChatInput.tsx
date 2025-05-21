@@ -1,19 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { Form } from "./ui/form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { IconSend2 } from "@tabler/icons-react";
 import { Input } from "./ui/input";
+import { debounce } from "@/lib/utils";
 
 const messageSchema = z.object({
   text: z.string().min(1),
 });
 
-const MessageInput = () => {
+const ChatInput = () => {
   const [text, setText] = useState("");
-  const { sendMessage } = useChatStore();
+  const { sendMessage, selectedUser } = useChatStore();
+  const { socket, authUser } = useAuthStore();
 
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
@@ -22,19 +25,55 @@ const MessageInput = () => {
     },
   });
 
+  const emitTyping = useCallback(
+    debounce(() => {
+      if (socket && selectedUser) {
+        socket.emit("typing", {
+          senderId: authUser._id,
+          receiverId: selectedUser._id,
+        });
+      }
+    }, 300),
+    [socket, selectedUser, authUser]
+  );
+
+  const emitStopTyping = useCallback(
+    debounce(() => {
+      if (socket && selectedUser) {
+        socket.emit("stopTyping", {
+          senderId: authUser._id,
+          receiverId: selectedUser._id,
+        });
+      }
+    }, 1000),
+    [socket, selectedUser, authUser]
+  );
+
+  useEffect(() => {
+    return () => {
+      emitTyping.cancel?.();
+      emitStopTyping.cancel?.();
+    };
+  }, [emitTyping, emitStopTyping]);
+
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!text.trim()) return;
 
     try {
-      await sendMessage({
-        text: text.trim(),
-      });
-
+      await sendMessage({ text: text.trim() });
       setText("");
+
+      emitStopTyping();
     } catch (error) {
       console.error("Failed to send message:", error);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
+    emitTyping();
+    emitStopTyping();
   };
 
   return (
@@ -46,7 +85,7 @@ const MessageInput = () => {
             className="w-full !bg-background !border-none h-16 active:ring-0 focus:ring-0 focus-visible:ring-0 !text-lg"
             placeholder="Type a message..."
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleInputChange}
           />
           <button
             type="submit"
@@ -60,4 +99,5 @@ const MessageInput = () => {
     </div>
   );
 };
-export default MessageInput;
+
+export default ChatInput;

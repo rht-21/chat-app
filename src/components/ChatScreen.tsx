@@ -7,16 +7,33 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { formatMessageTime } from "@/lib/utils";
 
 const ChatScreen = () => {
-  const { messages, getMessages, isMessagesLoading, selectedUser } =
-    useChatStore();
+  const {
+    messages,
+    getMessages,
+    isMessagesLoading,
+    selectedUser,
+    listenForMessages,
+    unlistenForMessages,
+  } = useChatStore();
 
   const { authUser } = useAuthStore();
 
-  const messageEndRef = useRef(null);
+  const messageEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getMessages(selectedUser._id);
   }, [getMessages, selectedUser._id]);
+
+  useEffect(() => {
+    if (messageEndRef.current && messages) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    listenForMessages();
+    return () => unlistenForMessages();
+  }, [listenForMessages, unlistenForMessages]);
 
   return (
     <main className="flex-1 overflow-hidden flex flex-col">

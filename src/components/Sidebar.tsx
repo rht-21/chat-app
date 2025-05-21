@@ -2,7 +2,6 @@
 import { useChatStore } from "@/store/useChatStore";
 import { useEffect } from "react";
 import { SidebarSkeleton } from "./ui/skeleton";
-import { IconUser } from "@tabler/icons-react";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const Sidebar = () => {
@@ -18,12 +17,8 @@ const Sidebar = () => {
   if (isUsersLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-20 lg:w-80 border-r border-neutral-900 flex flex-col transition-all duration-200 py-4 px-3">
-      <div className="flex items-center gap-2 p-4">
-        <IconUser size={16} stroke={1.5} />
-        <span className="font-medium hidden lg:block">Contacts</span>
-      </div>
-      <div className="overflow-y-auto w-full space-y-2 py-2 px-2">
+    <aside className="h-full w-fit md:w-64 lg:w-80 border-r border-neutral-900 flex flex-col transition-all duration-200 p-2">
+      <div className="overflow-y-auto w-full space-y-2">
         {users.map((user) => (
           <button
             key={user._id}
@@ -38,7 +33,7 @@ const Sidebar = () => {
               }
             `}
           >
-            <div className="relative mx-auto lg:mx-0">
+            <div className="relative mx-auto md:mx-0">
               <img
                 src={
                   user.profilePicture ||
@@ -49,17 +44,17 @@ const Sidebar = () => {
               />
               {onlineUsers.includes(user._id) && (
                 <span
-                  className="absolute bottom-0 right-0 size-3 bg-green-500 
+                  className="absolute bottom-0 right-0 size-3 bg-emerald-700
                   rounded-full ring-2 ring-zinc-900"
                 />
               )}
             </div>
 
-            <div className="hidden lg:block text-left min-w-0">
+            <div className="hidden md:flex flex-col text-left min-w-0">
               <div className="font-medium truncate">{user.fullName}</div>
-              <div className="text-sm text-zinc-400">
+              <small className="text-zinc-400">
                 {onlineUsers.includes(user._id) ? "Online" : "Offline"}
-              </div>
+              </small>
             </div>
           </button>
         ))}
