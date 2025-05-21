@@ -18,8 +18,8 @@ const Sidebar = () => {
   if (isUsersLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-20 lg:w-80 border-r border-neutral-900 flex flex-col transition-all duration-200">
-      <div className="flex items-center gap-2 p-3">
+    <aside className="h-full w-20 lg:w-80 border-r border-neutral-900 flex flex-col transition-all duration-200 py-4 px-3">
+      <div className="flex items-center gap-2 p-4">
         <IconUser size={16} stroke={1.5} />
         <span className="font-medium hidden lg:block">Contacts</span>
       </div>
@@ -29,7 +29,7 @@ const Sidebar = () => {
             key={user._id}
             onClick={() => setSelectedUser(user)}
             className={`
-              w-full flex px-1 py-1 items-center gap-2 rounded-md
+              w-full flex px-2 py-1 items-center gap-2 rounded-md
               hover:bg-neutral-900 transition-colors cursor-pointer
               ${
                 selectedUser?._id === user._id
